@@ -34,6 +34,10 @@ const controller = {
                 team: params
             });
         }
+        return res.status(200).send({
+            status: 'error',
+            message: 'Los datos no son validos.'
+        });
     },
 
 };
