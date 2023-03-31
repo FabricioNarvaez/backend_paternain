@@ -48,7 +48,7 @@ const controller = {
                     status: 'error',
                     message: 'Error al guardar el equipo.',
                     error: err
-                    });
+                });
             });
         }else{
             return res.status(200).send({
@@ -57,7 +57,27 @@ const controller = {
             });
         }
     },
-
+    getTeams: (req, res) => {
+        Team.find()
+        .then((teams) => {
+            return !teams ?
+                res.status(404).send({
+                    status: 'error',
+                    message: 'No hay equipos.'
+                }) :
+                res.status(200).send({
+                    status: 'success',
+                    teams
+                });
+        })
+        .catch((err) => {
+            return res.status(500).send({
+                status: 'error',
+                message: 'Error al devolver los equipos.',
+                error: err
+            });
+        });
+    }
 };
 
 module.exports = controller;
