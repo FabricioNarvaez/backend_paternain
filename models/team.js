@@ -12,4 +12,4 @@ const TeamSchema = new Schema({
     GC: Number,
 });
 
-module.exports = mongoose.model('Team', TeamSchema);
+module.exports = mongoose.model('Team', TeamSchema, "grupoA");

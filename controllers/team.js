@@ -13,31 +13,49 @@ const controller = {
 
     save: (req, res) => {
         const params = req.body;
-        try{
-            var validate_team = !validator.isEmpty(params.team);
-            var validate_PG = !validator.isEmpty(params.PG);
-            var validate_PE = !validator.isEmpty(params.PE);
-            var validate_PP = !validator.isEmpty(params.PP);
-            var validate_GF = !validator.isEmpty(params.GF);
-            var validate_GC = !validator.isEmpty(params.GC);
-
-            // var validate_content = !validator.isEmpty(params.content);
-        }catch(err){
-            return res.status(200).send({
-                status: 'error',
-                message: 'Faltan datos por enviar.'
-            });
-        }
+        
+        const validate_team = !validator.isEmpty(params.team);
+        const validate_PG = !validator.isEmpty(params.PG);
+        const validate_PE = !validator.isEmpty(params.PE);
+        const validate_PP = !validator.isEmpty(params.PP);
+        const validate_GF = !validator.isEmpty(params.GF);
+        const validate_GC = !validator.isEmpty(params.GC);
 
         if(validate_team && validate_PG && validate_PE && validate_PP && validate_GF && validate_GC){
+            const team = new Team();
+
+            team.team = params.team;
+            team.PG = params.PG;
+            team.PE = params.PE;
+            team.PP = params.PP;
+            team.GF = params.GF;
+            team.GC = params.GC;
+
+            team.save()
+            .then((teamStored) => {
+                return !teamStored ?
+                    res.status(404).send({
+                        status: 'error',
+                        message: 'El equipo no se ha guardado.'
+                    }) :
+                    res.status(200).send({
+                        status: 'success',
+                        team: teamStored
+                    });
+            })
+            .catch((err) => {
+                return res.status(500).send({
+                    status: 'error',
+                    message: 'Error al guardar el equipo.',
+                    error: err
+                    });
+            });
+        }else{
             return res.status(200).send({
-                team: params
+                status: 'error',
+                message: 'Los datos no son válidos.'
             });
         }
-        return res.status(200).send({
-            status: 'error',
-            message: 'Los datos no son validos.'
-        });
     },
 
 };
