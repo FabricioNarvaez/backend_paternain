@@ -78,6 +78,35 @@ const controller = {
             });
         });
     },
+    getTeam: (req, res) => {
+        const teamId = req.params.id;
+        if(teamId){
+            Team.findById(teamId)
+            .then((team) => {
+                return !team ?
+                    res.status(400).send({
+                        status: 'error',
+                        message: 'No hay equipo.'
+                    }) :
+                    res.status(200).send({
+                        status: 'success',
+                        team
+                    });
+            })
+            .catch((err) => {
+                return res.status(500).send({
+                    status: 'error',
+                    message: 'Error al devolver el equipo.',
+                    error: err
+                });
+            });
+        }else{
+            return res.status(400).send({
+                status: 'error',
+                message: 'Los datos no son válidos.'
+            });
+        }
+    },
     update: (req, res) => {
         const teamId = req.params.id;
         const params = req.body;
