@@ -34,12 +34,12 @@ const controller = {
             team.save()
             .then((teamStored) => {
                 return !teamStored ?
-                    res.status(404).send({
+                    res.status(400).send({
                         status: 'error',
                         message: 'El equipo no se ha guardado.'
                     }) :
-                    res.status(200).send({
-                        status: 'success',
+                    res.status(201).send({
+                        status: 'Created',
                         team: teamStored
                     });
             })
@@ -51,7 +51,7 @@ const controller = {
                 });
             });
         }else{
-            return res.status(200).send({
+            return res.status(400).send({
                 status: 'error',
                 message: 'Los datos no son válidos.'
             });
@@ -61,7 +61,7 @@ const controller = {
         Team.find()
         .then((teams) => {
             return !teams ?
-                res.status(404).send({
+                res.status(400).send({
                     status: 'error',
                     message: 'No hay equipos.'
                 }) :
@@ -77,7 +77,38 @@ const controller = {
                 error: err
             });
         });
+    },
+    update: (req, res) => {
+        const teamId = req.params.id;
+        const params = req.body;
+        if(teamId){
+            Team.findOneAndUpdate({_id: teamId}, params, {new: true})
+            .then((teamUpdated) => {
+                return !teamUpdated ?
+                    res.status(400).send({
+                        status: 'error',
+                        message: 'El equipo no se ha actualizado.'
+                    }) :
+                    res.status(200).send({
+                        status: 'Updated',
+                        team: teamUpdated
+                    });
+            })
+            .catch((err) => {
+                return res.status(500).send({
+                    status: 'error',
+                    message: 'Error al actualizar el equipo.',
+                    error: err
+                    });
+            });
+        }else{
+            return res.status(400).send({
+                status: 'error',
+                message: 'Los datos no son válidos.'
+            });
+        }
     }
+        
 };
 
 module.exports = controller;
