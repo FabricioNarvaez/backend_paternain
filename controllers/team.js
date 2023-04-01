@@ -107,6 +107,35 @@ const controller = {
                 message: 'Los datos no son válidos.'
             });
         }
+    },
+    delete: (req, res) => {
+        const teamId = req.params.id;
+        if(teamId){
+            Team.findByIdAndDelete({_id: teamId})
+            .then((teamDeleted) => {
+                return !teamDeleted ?
+                    res.status(400).send({
+                        status: 'error',
+                        message: 'El equipo no se ha eliminado.'
+                    }) :
+                    res.status(200).send({
+                        status: 'Deleted',
+                        team: teamDeleted
+                    });
+            })
+            .catch((err) => {
+                return res.status(500).send({
+                    status: 'error',
+                    message: 'Error al eliminar el equipo.',
+                    error: err
+                });
+            });
+        }else{
+            return res.status(400).send({
+                status: 'error',
+                message: 'Los datos no son válidos.'
+            });
+        }
     }
         
 };
