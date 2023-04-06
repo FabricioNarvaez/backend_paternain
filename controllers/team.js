@@ -1,7 +1,7 @@
 'use strict'
 
 const validator = require('validator');
-const Team = require('../models/team');
+const { TeamModelA, TeamModelB } = require('../models/team');
 
 const controller = {
 
@@ -57,26 +57,30 @@ const controller = {
             });
         }
     },
-    getTeams: (req, res) => {
-        Team.find()
-        .then((teams) => {
+    getTeams: async (req, res) => {
+        try{
+            const teamsA = await TeamModelA.find();
+            const teamsB = await TeamModelB.find();
+      
+            const teams = [...teamsA, ...teamsB];
+
             return !teams ?
-                res.status(400).send({
+                    res.status(400).send({
                     status: 'error',
                     message: 'No hay equipos.'
-                }) :
-                res.status(200).send({
+                    }) :
+                    res.status(200).send({
                     status: 'success',
                     teams
-                });
-        })
-        .catch((err) => {
+                    });
+
+        }catch(err){
             return res.status(500).send({
                 status: 'error',
                 message: 'Error al devolver los equipos.',
                 error: err
             });
-        });
+        }
     },
     getTeam: (req, res) => {
         const teamId = req.params.id;

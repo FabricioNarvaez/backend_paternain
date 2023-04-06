@@ -11,5 +11,7 @@ const TeamSchema = new Schema({
     GF: Number,
     GC: Number,
 });
+const TeamModelA = mongoose.model('TeamA', TeamSchema, 'grupoA');
+const TeamModelB = mongoose.model('TeamB', TeamSchema, 'grupoB');
 
-module.exports = mongoose.model('Team', TeamSchema, "grupoA");
+module.exports = { TeamModelA, TeamModelB };
