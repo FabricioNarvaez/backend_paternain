@@ -80,7 +80,7 @@ const controller = {
         const teamId = req.params.id;
         const group = req.params.group.toUpperCase();
         const Team = group === 'A' ? TeamModelA : TeamModelB;
-        
+
         if(teamId){
             Team.findById(teamId)
             .then((team) => {
@@ -110,6 +110,8 @@ const controller = {
     },
     update: (req, res) => {
         const teamId = req.params.id;
+        const group = req.params.group.toUpperCase();
+        const Team = group === 'A' ? TeamModelA : TeamModelB;
         const params = req.body;
         if(teamId){
             Team.findOneAndUpdate({_id: teamId}, params, {new: true})
