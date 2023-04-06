@@ -4,13 +4,6 @@ const validator = require('validator');
 const { TeamModelA, TeamModelB } = require('../models/team');
 
 const controller = {
-
-    test: (req, res) => {
-        return res.status(200).send({
-            message: 'Test'
-        });
-    },
-
     save: (req, res) => {
         const params = req.body;
         
