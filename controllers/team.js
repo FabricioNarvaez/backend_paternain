@@ -78,6 +78,9 @@ const controller = {
     },
     getTeam: (req, res) => {
         const teamId = req.params.id;
+        const group = req.params.group.toUpperCase();
+        const Team = group === 'A' ? TeamModelA : TeamModelB;
+        
         if(teamId){
             Team.findById(teamId)
             .then((team) => {
