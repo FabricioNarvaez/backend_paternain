@@ -61,17 +61,16 @@ const controller = {
         try{
             const teamsA = await TeamModelA.find();
             const teamsB = await TeamModelB.find();
-      
-            const teams = [...teamsA, ...teamsB];
 
-            return !teams ?
+            return !teamsA || !teamsB ?
                     res.status(400).send({
                     status: 'error',
                     message: 'No hay equipos.'
                     }) :
                     res.status(200).send({
                     status: 'success',
-                    teams
+                    teamsGroupA: teamsA,
+                    teamsGroupB: teamsB
                     });
 
         }catch(err){
