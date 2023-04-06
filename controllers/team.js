@@ -6,6 +6,7 @@ const { TeamModelA, TeamModelB } = require('../models/team');
 const controller = {
     save: (req, res) => {
         const params = req.body;
+        const group = params.group.toUpperCase();
         
         const validate_team = !validator.isEmpty(params.team);
         const validate_PG = !validator.isEmpty(params.PG);
@@ -13,9 +14,10 @@ const controller = {
         const validate_PP = !validator.isEmpty(params.PP);
         const validate_GF = !validator.isEmpty(params.GF);
         const validate_GC = !validator.isEmpty(params.GC);
+        const validate_group  = !validator.isEmpty(group);
 
-        if(validate_team && validate_PG && validate_PE && validate_PP && validate_GF && validate_GC){
-            const team = new Team();
+        if(validate_team && validate_PG && validate_PE && validate_PP && validate_GF && validate_GC && validate_group){
+            const team = group === 'A' ? new TeamModelA() : new TeamModelB();
 
             team.team = params.team;
             team.PG = params.PG;
