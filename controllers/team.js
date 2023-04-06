@@ -113,6 +113,7 @@ const controller = {
         const group = req.params.group.toUpperCase();
         const Team = group === 'A' ? TeamModelA : TeamModelB;
         const params = req.body;
+        
         if(teamId){
             Team.findOneAndUpdate({_id: teamId}, params, {new: true})
             .then((teamUpdated) => {
@@ -142,6 +143,9 @@ const controller = {
     },
     delete: (req, res) => {
         const teamId = req.params.id;
+        const group = req.params.group.toUpperCase();
+        const Team = group === 'A' ? TeamModelA : TeamModelB;
+
         if(teamId){
             Team.findByIdAndDelete({_id: teamId})
             .then((teamDeleted) => {

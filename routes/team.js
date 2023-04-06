@@ -9,6 +9,6 @@ router.post('/save', TeamController.save);
 router.get('/teams', TeamController.getTeams);
 router.get('/team/:group/:id', TeamController.getTeam);
 router.put('/team/:group/:id', TeamController.update);
-router.delete('/team/:id', TeamController.delete);
+router.delete('/team/:group/:id', TeamController.delete);
 
 module.exports = router;
