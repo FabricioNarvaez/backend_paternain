@@ -4,6 +4,7 @@ const express = require('express');
 const app = express();
 
 const team_routes = require('./routes/team');
+const auth = require('./routes/auth');
 
 app.use(express.urlencoded({extended:false}));
 app.use(express.json());
@@ -17,5 +18,6 @@ app.use((req, res, next) => {
 });
 
 app.use('/api',team_routes);
+app.use('',auth);
 
 module.exports = app;
