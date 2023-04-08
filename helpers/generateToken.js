@@ -6,4 +6,13 @@ const generateToken = async (user) => {
     return token;
 }
 
-module.exports = { generateToken };
+const veryfyToken = async (token) => {
+    try {
+        const verify = await jwt.verify(token, process.env.JWT_SECRET);
+        return verify;
+    } catch (error) {
+        return error;
+    }
+}
+
+module.exports = { generateToken, veryfyToken };

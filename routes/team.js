@@ -2,9 +2,11 @@
 
 const express = require('express');
 const TeamController = require('../controllers/team');
+const { checkAuth } = require('../middleware/auth');
 
 var router = express.Router();
 
+router.get('/test', checkAuth, TeamController.test);
 router.post('/save', TeamController.save);
 router.get('/teams', TeamController.getTeams);
 router.get('/team/:group/:id', TeamController.getTeam);
