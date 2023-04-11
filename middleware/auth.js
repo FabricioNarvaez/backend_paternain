@@ -5,7 +5,9 @@ const checkAuth = async (req, res, next) => {
         const token = req.headers.authorization.split(' ').pop();
         const tokenData = await veryfyToken(token);
         if(tokenData.id){
-            next();
+            return res.status(200).send({
+                message: 'Test desde middleware'
+            });
         }else{
             res.status(401).send({ message: 'Unauthorized' });
         }

@@ -13,6 +13,8 @@ const loginCtrl = async (req, res) => {
         const tokenSession = await generateToken(user);
         if(checkPassword){
             res.send({ data: user, token: tokenSession });
+        }else{
+            res.status(401).send({ message: "Unauthorized" });
         }
     } catch (error) {
         res.status(500).send({ message: error.message });
