@@ -8,9 +8,7 @@ const checkAuth = async (req, res) => {
         const { token } = req.body;
         const tokenData = await veryfyToken(token);
         if(tokenData.id){
-            return res.status(200).send({
-                message: 'Token is valid'
-            });
+            res.send({ message: 'Token is valid'});
         }else{
             res.status(401).send({ message: 'Unauthorized' });
         }
