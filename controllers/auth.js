@@ -8,13 +8,14 @@ const loginCtrl = async (req, res) => {
         const user = await usersModel.findOne({ email });
         if(!user){
             res.status(404).send({ message: "User not found" });
-        }
-        const checkPassword = await comparePassword(password, user.password);
-        const tokenSession = await generateToken(user);
-        if(checkPassword){
-            res.send({ data: user, token: tokenSession });
         }else{
-            res.status(401).send({ message: "Unauthorized" });
+            const checkPassword = await comparePassword(password, user.password);
+            const tokenSession = await generateToken(user);
+            if(checkPassword){
+                res.send({ data: user, token: tokenSession });
+            }else{
+                res.status(401).send({ message: "Unauthorized" });
+            }
         }
     } catch (error) {
         res.status(500).send({ message: error.message });
