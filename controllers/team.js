@@ -117,10 +117,26 @@ const controller = {
         const teamId = req.params.id;
         const group = req.params.group.toUpperCase();
         const Team = group === 'A' ? TeamModelA : TeamModelB;
-        const params = req.body;
         
         if(teamId){
-            Team.findOneAndUpdate({_id: teamId}, params, {new: true})
+            Team.findOne({_id: teamId})
+            .then((team) => {
+                if(!team){
+                    return res.status(400).send({
+                        status: 'error',
+                        message: 'No hay equipo.'
+                    });
+                }else{
+                    const { PP = 0, PE = 0, PG = 0, GF = 0, GC = 0 } = req.body;
+                    const newPP = parseInt(team.PP) + parseInt(PP);
+                    const newPE = parseInt(team.PE) + parseInt(PE);
+                    const newPG = parseInt(team.PG) + parseInt(PG);
+                    const newGF = parseInt(team.GF) + parseInt(GF);
+                    const newGC = parseInt(team.GC) + parseInt(GC);
+                    const newValues = {PP: newPP, PE: newPE, PG: newPG, GF: newGF, GC: newGC};
+                    return Team.findOneAndUpdate({_id: teamId}, newValues, {new: true})
+                }
+            })
             .then((teamUpdated) => {
                 return !teamUpdated ?
                     res.status(400).send({
