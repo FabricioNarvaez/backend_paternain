@@ -11,7 +11,7 @@ mongoose.connect(url, options)
     .then(()=>{
         console.log(`La conexión a la base de datos ${database} se ha realizado correctamente.`);
 
-        app.set('port', process.env.PORT || 3000);
+        app.set('port', process.env.PORT || 3900);
         
         app.listen(app.get('port'), () => {
             console.log(`Servidor corriendo en el puerto: ${app.get('port')}`);
