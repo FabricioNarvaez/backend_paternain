@@ -18,6 +18,7 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use('/players', scorer);
 app.use('/api',team_routes);
 app.use('',auth);
 

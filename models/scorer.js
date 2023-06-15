@@ -9,6 +9,6 @@ const scorerSchema = new Schema({
     goals: Number
 });
 
-const scorerModel = mongoose.model('scorer', scorerSchema);
+const scorerModel = mongoose.model('scorer', scorerSchema, 'scorer');
 
 module.exports = { scorerModel };

@@ -1,7 +1,7 @@
 'use strict'
 
 const validator = require('validator');
-const { scorerModel } = require('../models/team');
+const { scorerModel } = require('../models/scorer');
 
 const controller = {
     getTeams: async (req, res) =>{
@@ -26,3 +26,5 @@ const controller = {
         }
     }
 }
+
+module.exports = controller;
