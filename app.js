@@ -5,6 +5,7 @@ const app = express();
 
 const team_routes = require('./routes/team');
 const auth = require('./routes/auth');
+const scorer = require('./routes/scorer')
 
 app.use(express.urlencoded({extended:false}));
 app.use(express.json());
