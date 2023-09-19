@@ -113,6 +113,10 @@ const controller = {
             });
         }
     },
+    updateMatchData: (req, res) =>{
+        console.log(req.body);
+        res.send('Datos del partido actualizados.');
+    },
     update: (req, res) => {
         const teamId = req.params.id;
         const group = req.params.group.toUpperCase();
