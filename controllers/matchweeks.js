@@ -1,26 +1,26 @@
 'use strict'
 
-const validator = require('validator');
-const { scorerModel } = require('../models/scorer');
+// const validator = require('validator');
+const { matchWeeksModel } = require('../models/matchweeks');
 
 const controller = {
-    getTeams: async (req, res) =>{
+    getMatchWeeks: async (req, res) =>{
         try{
-            const players = await scorerModel.find();
+            const matchWeeks = await matchWeeksModel.find();
 
-            return !players ?
+            return !matchWeeks ?
                     res.status(400).send({
                     status: 'error',
-                    message: 'No hay jugadores.'
+                    message: 'No hay jornadas.'
                     }) :
                     res.status(200).send({
                     status: 'success',
-                    players: players
+                    matchWeeks: matchWeeks
                     });
         }catch(err){
             return res.status(500).send({
                 status: 'error',
-                message: 'Error al devolver jugador.',
+                message: 'Error al devolver jornadas.',
                 error: err
             })
         }
