@@ -5,7 +5,7 @@ const app = express();
 
 const team_routes = require('./routes/team');
 const auth = require('./routes/auth');
-const scorer = require('./routes/scorer')
+const matchweeks = require('./routes/matchweeks')
 
 app.use(express.urlencoded({extended:false}));
 app.use(express.json());
@@ -18,7 +18,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/players', scorer);
+app.use('/matchweeks', matchweeks);
 app.use('/api',team_routes);
 app.use('',auth);
 
