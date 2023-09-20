@@ -9,6 +9,7 @@ var router = express.Router();
 router.get('/test', checkAuth, TeamController.test);
 router.post('/save', TeamController.save);
 router.get('/teams', TeamController.getTeams);
+router.get('/teams/players', TeamController.getPlayers);
 router.get('/team/:group/:id', TeamController.getTeam);
 router.put('/team/:group/:id', TeamController.update);
 router.put('/update', TeamController.updateMatchData);
