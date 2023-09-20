@@ -64,19 +64,73 @@ const controller = {
 
             return !teamsA || !teamsB ?
                     res.status(400).send({
-                    status: 'error',
-                    message: 'No hay equipos.'
+                        status: 'error',
+                        message: 'No hay equipos.'
                     }) :
                     res.status(200).send({
-                    status: 'success',
-                    teamsGroupA: teamsA,
-                    teamsGroupB: teamsB
+                        status: 'success',
+                        teamsGroupA: teamsA,
+                        teamsGroupB: teamsB
                     });
 
         }catch(err){
             return res.status(500).send({
                 status: 'error',
                 message: 'Error al devolver los equipos.',
+                error: err
+            });
+        }
+    },
+    getPlayers: async (req, res) => {
+        try{
+            const teamsA = await TeamModelA.find();
+            const teamsB = await TeamModelB.find();
+            const teams = teamsA.concat(teamsB);
+
+            const data = [];
+
+            teams.forEach(team =>{
+                const teamData = {};
+                teamData.players = [];
+                const players = team._doc.players;
+                const teamName = team._doc.team;
+                for(let key in players){
+                    if(players[key] !== 0){
+                        teamData.players.push({
+                            name: key,
+                            goals: players[key],
+                            team: teamName
+                        })
+                    }
+                }
+                if(Object.keys(teamData).length !== 0){
+                    data.push(teamData);
+                }
+            })
+
+            function orderByGoals(a,b){
+                return b.goals - a.goals;
+            }
+
+            const allPlayers = data.reduce((acumulador, item) => {
+                return acumulador.concat(item.players);
+            }, []);
+            const dataOrdered = allPlayers.sort(orderByGoals);
+
+            return !teams ?
+                    res.status(400).send({
+                        status: 'error',
+                        message: 'No hay jugadores.'
+                    }) :
+                    res.status(200).send({
+                        status: 'success',
+                        data: dataOrdered
+                    });
+
+        }catch(err){
+            return res.status(500).send({
+                status: 'error',
+                message: 'Error al devolver los jugadores.',
                 error: err
             });
         }
