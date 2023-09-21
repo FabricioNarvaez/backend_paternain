@@ -168,7 +168,43 @@ const controller = {
         }
     },
     updateMatchData: (req, res) =>{
-        console.log(req.body);
+        const params = req.body;
+        TeamModelA.findOne({team: params.local.team})
+            .then((team) =>{
+                const {local, visitor} = req.body;
+                const visitorGoalsArray = visitor.goals.map((goal) => parseInt(goal.goals, 10));
+                const visitorTotalGoals = visitorGoalsArray.reduce((total, goalsScored) => {
+                    if (!isNaN(goalsScored)) {
+                        return total + goalsScored;
+                    }
+                    return total;
+                }, 0);
+                const localGoalsArray = local.goals.map((goal) => parseInt(goal.goals, 10));
+                const localTotalGoals = localGoalsArray.reduce((total, goalsScored) => {
+                    if (!isNaN(goalsScored)) {
+                        return total + goalsScored;
+                    }
+                    return total;
+                }, 0);
+
+                const LocalWins = localTotalGoals > visitorTotalGoals;
+                const update = {
+                    $inc: {
+                      PG: LocalWins ? 1 : 0,
+                      PE: localTotalGoals === visitorTotalGoals ? 1 : 0,
+                      PP: !LocalWins ? 1 : 0,
+                      GF: localTotalGoals,
+                      GC: visitorTotalGoals
+                    }
+                  };
+                
+                  for (let player of local.goals) {
+                    update.$inc[`players.${player.name}`] = parseInt(player.goals);
+                  }
+
+
+                return TeamModelA.findOneAndUpdate({team: team.team}, update, { new: true })
+            })
         res.send('Datos del partido actualizados.');
     },
     update: (req, res) => {
