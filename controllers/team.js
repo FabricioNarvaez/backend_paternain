@@ -167,8 +167,71 @@ const controller = {
             });
         }
     },
-    updateMatchData: (req, res) =>{
-        console.log(req.body);
+    updateMatchData: async (req, res) =>{
+        function getTotalGoals(array){
+            return array.reduce((total, goalsScored) => {
+                if (!isNaN(goalsScored)) {
+                return total + goalsScored;
+                }
+                return total;
+            }, 0)
+        }
+
+        function createUpdateObject(localWins, draw, goalsA, goalsB){
+            return {
+                $inc: {
+                PG: localWins && !draw ? 1 : 0,
+                PE: draw ? 1 : 0,
+                PP: !localWins && !draw  ? 1 : 0,
+                GF: goalsA,
+                GC: goalsB,
+                },
+            };
+        }
+
+        function addPlayersToUpdateData(array, updateObject){
+            for (let player of array) {
+                updateObject.$inc[`players.${player.name}`] = parseInt(player.goals);
+            }
+            return updateObject;
+        }
+
+        async function updateData(req, model){
+            const { local, visitor } = req.body;
+            const localGoalsArray = local.goals.map((goal) => parseInt(goal.goals, 10));
+            const visitorGoalsArray = visitor.goals.map((goal) => parseInt(goal.goals, 10));
+
+            const localTotalGoals = getTotalGoals(localGoalsArray);
+            const visitorTotalGoals = getTotalGoals(visitorGoalsArray);
+        
+            const localWins = localTotalGoals > visitorTotalGoals;
+            const draw = localTotalGoals === visitorTotalGoals;
+
+            let updateLocal = createUpdateObject(localWins, draw, localTotalGoals, visitorTotalGoals);
+            let updateVisitor = createUpdateObject(!localWins, draw, visitorTotalGoals, localTotalGoals);
+
+            updateLocal = addPlayersToUpdateData(local.goals, updateLocal);
+            updateVisitor = addPlayersToUpdateData(visitor.goals, updateVisitor);
+
+            await model.findOneAndUpdate({ team: local.team },updateLocal,{ new: true });
+            await model.findOneAndUpdate({ team: visitor.team }, updateVisitor,{ new: true });
+        }
+
+        try {
+            const params = req.body;
+            const teamGropA = await TeamModelA.findOne({ team: params.local.team });
+            if (teamGropA) {
+                updateData(req, TeamModelA);
+            } else if(await TeamModelB.findOne({ team: params.local.team })) {
+                updateData(req, TeamModelB);
+            }
+          } catch (error) {
+            return res.status(400).send({
+                status: 'error',
+                message: 'Error al actualizar.'
+            });
+          }
+          
         res.send('Datos del partido actualizados.');
     },
     update: (req, res) => {
