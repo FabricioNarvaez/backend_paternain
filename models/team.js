@@ -10,6 +10,7 @@ const TeamSchema = new Schema({
     PP: Number,
     GF: Number,
     GC: Number,
+    logo: String,
     players: Object,
 });
 const TeamModelA = mongoose.model('TeamA', TeamSchema, 'grupoA');
