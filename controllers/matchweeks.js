@@ -6,25 +6,8 @@ const { TeamModelA, TeamModelB } = require('../models/team');
 
 const controller = {
     getMatchWeeks: async (req, res) =>{
-        async function asignLogoToGrup(group, TeamModel) {
-            const [local, visitor] = await Promise.all([
-              TeamModel.findOne({ team: group.local }),
-              TeamModel.findOne({ team: group.visitor })
-            ]);
-          
-            group["localLogo"] = local?.logo || "https://res.cloudinary.com/dzd68sxue/image/upload/v1695396332/WEBP/default-bnoacd-1_qnmcps.webp";
-            group["visitorLogo"] = visitor?.logo || "https://res.cloudinary.com/dzd68sxue/image/upload/v1695396332/WEBP/default-bnoacd-1_qnmcps.webp";
-          }
-          
-
         try{
             const matchWeeks = await matchWeeksModel.find();
-            for (let week of matchWeeks) {
-                for (let hourMatch of week.matches) {
-                    await asignLogoToGrup(hourMatch.groupA, TeamModelA);
-                    await asignLogoToGrup(hourMatch.groupB, TeamModelB);
-                }
-              }
 
             return !matchWeeks ?
                     res.status(400).send({
