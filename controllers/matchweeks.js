@@ -6,20 +6,20 @@ const { TeamModelA, TeamModelB } = require('../models/team');
 
 const controller = {
     getMatchWeeks: async (req, res) =>{
-        async function asignarLogosAGrupo(group, TeamModel) {
+        async function asignLogoToGrup(group, TeamModel) {
             const local = await TeamModel.findOne({ team: group.local });
             const visitor = await TeamModel.findOne({ team: group.visitor });
           
             group["localLogo"] = local?.logo || "https://res.cloudinary.com/dzd68sxue/image/upload/v1695396332/WEBP/default-bnoacd-1_qnmcps.webp";
             group["visitorLogo"] = visitor?.logo || "https://res.cloudinary.com/dzd68sxue/image/upload/v1695396332/WEBP/default-bnoacd-1_qnmcps.webp";
         }
-        
+
         try{
             const matchWeeks = await matchWeeksModel.find();
             for (let week of matchWeeks) {
                 for (let hourMatch of week.matches) {
-                    await asignarLogosAGrupo(hourMatch.groupA, TeamModelA);
-                    await asignarLogosAGrupo(hourMatch.groupB, TeamModelB);
+                    await asignLogoToGrup(hourMatch.groupA, TeamModelA);
+                    await asignLogoToGrup(hourMatch.groupB, TeamModelB);
                 }
               }
 
