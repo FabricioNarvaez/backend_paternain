@@ -228,13 +228,6 @@ const controller = {
             };
         }
 
-        function addPlayersToUpdateData(playersThatScored, updateObject){
-            for (let player of playersThatScored) {
-                updateObject.$inc[`players.${player.name}`] = player.goals;
-            }
-            return updateObject;
-        }
-
         async function updateData(req, model){
             const { local, visitor } = req.body;
 
@@ -261,11 +254,9 @@ const controller = {
                 });
             })
 
-            // updateLocal = addPlayersToUpdateData(local.players, updateLocal);
-            // updateVisitor = addPlayersToUpdateData(visitor.players, updateVisitor);
-
             await model.findOneAndUpdate({ team: local.team },updateLocal,{ new: true });
             await model.findOneAndUpdate({ team: visitor.team }, updateVisitor,{ new: true });
+            // TODO: Añadir resultado a la colección Matchweek
         }
 
         try {
