@@ -2,6 +2,7 @@
 
 const validator = require('validator');
 const { TeamModelA, TeamModelB } = require('../models/team');
+const { matchWeeksModel } = require('../models/matchweeks');
 
 const controller = {
     test: (req, res) => {
@@ -81,6 +82,14 @@ const controller = {
             });
         }
     },
+    getMatchweekAdmin: async (req, res) =>{
+        try {
+            const matchweek = await matchWeeksModel.find()
+            return res.status(200).send({matchweek});
+        } catch (error) {
+            return res.status(404).send({message: error});
+        }
+    },
     getPlayers: async (req, res) => {
         try{
             const teamsA = await TeamModelA.find();
@@ -135,7 +144,36 @@ const controller = {
             });
         }
     },
-    getTeam: (req, res) => {
+    getTeamByName:(req, res)=>{
+        const teamName = req.params.name;
+        const group = req.params.group;
+        const Team = group === 'groupA' ? TeamModelA : TeamModelB;
+
+        if(teamName){
+            Team.findOne({ team: teamName })
+            .then((team) => {
+                return !team ?
+                    res.status(400).send({
+                        status: 'error',
+                        message: 'No hay equipo.'
+                    }) :
+                    res.status(200).send({team});
+            })
+            .catch((err) => {
+                return res.status(500).send({
+                    status: 'error',
+                    message: 'Error al devolver el equipo.',
+                    error: err
+                });
+            });
+        }else{
+            return res.status(400).send({
+                status: 'error',
+                message: 'Los datos no son válidos.'
+            });
+        }
+    },
+    getTeamByID: (req, res) => {
         const teamId = req.params.id;
         const group = req.params.group.toUpperCase();
         const Team = group === 'A' ? TeamModelA : TeamModelB;
@@ -169,9 +207,10 @@ const controller = {
     },
     updateMatchData: async (req, res) =>{
         function getTotalGoals(array){
-            return array.reduce((total, goalsScored) => {
-                if (!isNaN(goalsScored)) {
-                return total + goalsScored;
+            return array.reduce((total, object) => {
+                const goals = object.goals;
+                if (!isNaN(goals)) {
+                    return total + goals;
                 }
                 return total;
             }, 0)
@@ -189,20 +228,18 @@ const controller = {
             };
         }
 
-        function addPlayersToUpdateData(array, updateObject){
-            for (let player of array) {
-                updateObject.$inc[`players.${player.name}`] = parseInt(player.goals);
+        function addPlayersToUpdateData(playersThatScored, updateObject){
+            for (let player of playersThatScored) {
+                updateObject.$inc[`players.${player.name}`] = player.goals;
             }
             return updateObject;
         }
 
         async function updateData(req, model){
             const { local, visitor } = req.body;
-            const localGoalsArray = local.goals.map((goal) => parseInt(goal.goals, 10));
-            const visitorGoalsArray = visitor.goals.map((goal) => parseInt(goal.goals, 10));
 
-            const localTotalGoals = getTotalGoals(localGoalsArray);
-            const visitorTotalGoals = getTotalGoals(visitorGoalsArray);
+            const localTotalGoals = getTotalGoals(local.players);
+            const visitorTotalGoals = getTotalGoals(visitor.players);
         
             const localWins = localTotalGoals > visitorTotalGoals;
             const draw = localTotalGoals === visitorTotalGoals;
@@ -210,8 +247,22 @@ const controller = {
             let updateLocal = createUpdateObject(localWins, draw, localTotalGoals, visitorTotalGoals);
             let updateVisitor = createUpdateObject(!localWins, draw, visitorTotalGoals, localTotalGoals);
 
-            updateLocal = addPlayersToUpdateData(local.goals, updateLocal);
-            updateVisitor = addPlayersToUpdateData(visitor.goals, updateVisitor);
+            local.players.forEach(player =>{
+                model.updateOne(
+                    { team: local.team },
+                    { $inc: {"players.$[jug].goals": player.goals}},
+                    { arrayFilters: [{"jug.name": player.name}]}
+                )
+                .then(result => {
+                    console.log(result);
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+            })
+
+            // updateLocal = addPlayersToUpdateData(local.players, updateLocal);
+            // updateVisitor = addPlayersToUpdateData(visitor.players, updateVisitor);
 
             await model.findOneAndUpdate({ team: local.team },updateLocal,{ new: true });
             await model.findOneAndUpdate({ team: visitor.team }, updateVisitor,{ new: true });
@@ -219,8 +270,8 @@ const controller = {
 
         try {
             const params = req.body;
-            const teamGropA = await TeamModelA.findOne({ team: params.local.team });
-            if (teamGropA) {
+            const teamGroupA = await TeamModelA.findOne({ team: params.local.team });
+            if (teamGroupA) {
                 updateData(req, TeamModelA);
             } else if(await TeamModelB.findOne({ team: params.local.team })) {
                 updateData(req, TeamModelB);
