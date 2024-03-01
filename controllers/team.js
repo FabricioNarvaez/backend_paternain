@@ -107,7 +107,7 @@ const controller = {
                     if(players[key] !== 0){
                         teamData.players.push({
                             name: key,
-                            goals: players[key],
+                            players: players[key],
                             team: teamName
                         })
                     }
