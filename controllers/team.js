@@ -264,17 +264,19 @@ const controller = {
 
             await model.findOneAndUpdate({ team: local.team },updateLocal,{ new: true });
             await model.findOneAndUpdate({ team: visitor.team }, updateVisitor,{ new: true });
-            // TODO: Añadir resultado a la colección Matchweek
         }
 
         try {
-            const params = req.body;
-            const teamGroupA = await TeamModelA.findOne({ team: params.local.team });
+            const { matchWeek, local } = req.body;
+            const teamGroupA = await TeamModelA.findOne({ team: local.team });
             if (teamGroupA) {
                 updateData(req, TeamModelA);
-            } else if(await TeamModelB.findOne({ team: params.local.team })) {
+            } else if(await TeamModelB.findOne({ team: local.team })) {
                 updateData(req, TeamModelB);
             }
+            // TODO: Añadir resultado a la colección Matchweek
+            
+
           } catch (error) {
             return res.status(400).send({
                 status: 'error',
