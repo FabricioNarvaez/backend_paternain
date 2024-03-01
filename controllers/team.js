@@ -103,13 +103,16 @@ const controller = {
                 teamData.players = [];
                 const players = team._doc.players;
                 const teamName = team._doc.team;
-                for(let key in players){
-                    if(players[key] !== 0){
-                        teamData.players.push({
-                            name: key,
-                            players: players[key],
-                            team: teamName
-                        })
+                if(players.length){
+                    for(let player of players){
+                        const goals = player.goals; 
+                        if(goals !== 0){
+                            teamData.players.push({
+                                name: player.name,
+                                goals: goals,
+                                team: teamName
+                            })
+                        }
                     }
                 }
                 if(Object.keys(teamData).length !== 0){
@@ -240,19 +243,24 @@ const controller = {
             let updateLocal = createUpdateObject(localWins, draw, localTotalGoals, visitorTotalGoals);
             let updateVisitor = createUpdateObject(!localWins, draw, visitorTotalGoals, localTotalGoals);
 
-            local.players.forEach(player =>{
-                model.updateOne(
-                    { team: local.team },
-                    { $inc: {"players.$[jug].goals": player.goals}},
-                    { arrayFilters: [{"jug.name": player.name}]}
-                )
-                .then(result => {
-                    console.log(result);
-                })
-                .catch(err => {
-                    console.error(err);
+            function updatePlayerGoals(team) {
+                team.players.forEach(player => {
+                    model.updateOne(
+                        { team: team.team },
+                        { $inc: { "players.$[jug].goals": player.goals } },
+                        { arrayFilters: [{ "jug.name": player.name }] }
+                    )
+                    .then(result => {
+                        console.log(result);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
                 });
-            })
+            }
+            
+            updatePlayerGoals(local);
+            updatePlayerGoals(visitor);
 
             await model.findOneAndUpdate({ team: local.team },updateLocal,{ new: true });
             await model.findOneAndUpdate({ team: visitor.team }, updateVisitor,{ new: true });
