@@ -267,7 +267,7 @@ const controller = {
         }
 
         try {
-            const { matchWeek, local } = req.body;
+            const { matchWeek, group,  local } = req.body;
             const teamGroupA = await TeamModelA.findOne({ team: local.team });
             if (teamGroupA) {
                 updateData(req, TeamModelA);
