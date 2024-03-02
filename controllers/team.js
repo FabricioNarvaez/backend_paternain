@@ -103,13 +103,16 @@ const controller = {
                 teamData.players = [];
                 const players = team._doc.players;
                 const teamName = team._doc.team;
-                for(let key in players){
-                    if(players[key] !== 0){
-                        teamData.players.push({
-                            name: key,
-                            players: players[key],
-                            team: teamName
-                        })
+                if(players.length){
+                    for(let player of players){
+                        const goals = player.goals; 
+                        if(goals !== 0){
+                            teamData.players.push({
+                                name: player.name,
+                                goals: goals,
+                                team: teamName
+                            })
+                        }
                     }
                 }
                 if(Object.keys(teamData).length !== 0){
@@ -228,23 +231,17 @@ const controller = {
             };
         }
 
-        async function updateData(req, model){
-            const { local, visitor } = req.body;
-
-            const localTotalGoals = getTotalGoals(local.players);
-            const visitorTotalGoals = getTotalGoals(visitor.players);
-        
-            const localWins = localTotalGoals > visitorTotalGoals;
-            const draw = localTotalGoals === visitorTotalGoals;
-
-            let updateLocal = createUpdateObject(localWins, draw, localTotalGoals, visitorTotalGoals);
-            let updateVisitor = createUpdateObject(!localWins, draw, visitorTotalGoals, localTotalGoals);
-
-            local.players.forEach(player =>{
+        async function updateMatchWeek(localTeam, visitorTeam, localTotalGoals, visitorTotalGoals, matchWeek, group, model){
+            if(group === 'groupA'){
                 model.updateOne(
-                    { team: local.team },
-                    { $inc: {"players.$[jug].goals": player.goals}},
-                    { arrayFilters: [{"jug.name": player.name}]}
+                    { matchWeek: matchWeek },
+                    { $inc: { "matches.$[elem].groupA.localResult": localTotalGoals, "matches.$[elem].groupA.visitorResult": visitorTotalGoals } },
+                    { arrayFilters: [{ 
+                        $and: [
+                            { "elem.groupA.local": localTeam }, 
+                            { "elem.groupA.visitor": visitorTeam }
+                        ] 
+                    }]}
                 )
                 .then(result => {
                     console.log(result);
@@ -252,21 +249,72 @@ const controller = {
                 .catch(err => {
                     console.error(err);
                 });
-            })
+            }
+            if(group === 'groupB'){
+                model.updateOne(
+                    { matchWeek: matchWeek },
+                    { $inc: { "matches.$[elem].groupB.localResult": localTotalGoals, "matches.$[elem].groupB.visitorResult": visitorTotalGoals } },
+                    { arrayFilters: [{ 
+                        $and: [
+                            { "elem.groupB.local": localTeam }, 
+                            { "elem.groupB.visitor": visitorTeam }
+                        ] 
+                    }]}
+                )
+                .then(result => {
+                    console.log(result);
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+            }
+        }
+
+        async function updateData(local, visitor, localTotalGoals, visitorTotalGoals, model){
+            const localWins = localTotalGoals > visitorTotalGoals;
+            const draw = localTotalGoals === visitorTotalGoals;
+
+            let updateLocal = createUpdateObject(localWins, draw, localTotalGoals, visitorTotalGoals);
+            let updateVisitor = createUpdateObject(!localWins, draw, visitorTotalGoals, localTotalGoals);
+
+            function updatePlayerGoals(team) {
+                team.players.forEach(player => {
+                    model.updateOne(
+                        { team: team.team },
+                        { $inc: { "players.$[jug].goals": player.goals } },
+                        { arrayFilters: [{ "jug.name": player.name }] }
+                    )
+                    .then(result => {
+                        console.log(result);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
+                });
+            }
+            
+            updatePlayerGoals(local);
+            updatePlayerGoals(visitor);
 
             await model.findOneAndUpdate({ team: local.team },updateLocal,{ new: true });
             await model.findOneAndUpdate({ team: visitor.team }, updateVisitor,{ new: true });
-            // TODO: Añadir resultado a la colección Matchweek
         }
 
         try {
-            const params = req.body;
-            const teamGroupA = await TeamModelA.findOne({ team: params.local.team });
+            const { local, visitor, matchWeek, group } = req.body;
+            const teamGroupA = await TeamModelA.findOne({ team: local.team });
+            const localTotalGoals = getTotalGoals(local.players);
+            const visitorTotalGoals = getTotalGoals(visitor.players);
+            const localTeam = local.team;
+            const visitorTeam = visitor.team; 
             if (teamGroupA) {
-                updateData(req, TeamModelA);
-            } else if(await TeamModelB.findOne({ team: params.local.team })) {
-                updateData(req, TeamModelB);
+                updateData(local, visitor, localTotalGoals, visitorTotalGoals, TeamModelA);
+            } else if(await TeamModelB.findOne({ team: local.team })) {
+                updateData(local, visitor, localTotalGoals, visitorTotalGoals, TeamModelB);
             }
+            
+            updateMatchWeek(localTeam, visitorTeam,  localTotalGoals, visitorTotalGoals, matchWeek, group, matchWeeksModel);
+
           } catch (error) {
             return res.status(400).send({
                 status: 'error',
