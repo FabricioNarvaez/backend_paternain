@@ -231,12 +231,46 @@ const controller = {
             };
         }
 
-        async function updateData(req, model){
-            const { local, visitor } = req.body;
+        async function updateMatchWeek(localTeam, visitorTeam, localTotalGoals, visitorTotalGoals, matchWeek, group, model){
+            if(group === 'groupA'){
+                model.updateOne(
+                    { matchWeek: matchWeek },
+                    { $inc: { "matches.$[elem].groupA.localResult": localTotalGoals, "matches.$[elem].groupA.visitorResult": visitorTotalGoals } },
+                    { arrayFilters: [{ 
+                        $and: [
+                            { "elem.groupA.local": localTeam }, 
+                            { "elem.groupA.visitor": visitorTeam }
+                        ] 
+                    }]}
+                )
+                .then(result => {
+                    console.log(result);
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+            }
+            if(group === 'groupB'){
+                model.updateOne(
+                    { matchWeek: matchWeek },
+                    { $inc: { "matches.$[elem].groupB.localResult": localTotalGoals, "matches.$[elem].groupB.visitorResult": visitorTotalGoals } },
+                    { arrayFilters: [{ 
+                        $and: [
+                            { "elem.groupB.local": localTeam }, 
+                            { "elem.groupB.visitor": visitorTeam }
+                        ] 
+                    }]}
+                )
+                .then(result => {
+                    console.log(result);
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+            }
+        }
 
-            const localTotalGoals = getTotalGoals(local.players);
-            const visitorTotalGoals = getTotalGoals(visitor.players);
-        
+        async function updateData(local, visitor, localTotalGoals, visitorTotalGoals, model){
             const localWins = localTotalGoals > visitorTotalGoals;
             const draw = localTotalGoals === visitorTotalGoals;
 
@@ -267,15 +301,19 @@ const controller = {
         }
 
         try {
-            const { matchWeek, group,  local } = req.body;
+            const { local, visitor, matchWeek, group } = req.body;
             const teamGroupA = await TeamModelA.findOne({ team: local.team });
+            const localTotalGoals = getTotalGoals(local.players);
+            const visitorTotalGoals = getTotalGoals(visitor.players);
+            const localTeam = local.team;
+            const visitorTeam = visitor.team; 
             if (teamGroupA) {
-                updateData(req, TeamModelA);
+                updateData(local, visitor, localTotalGoals, visitorTotalGoals, TeamModelA);
             } else if(await TeamModelB.findOne({ team: local.team })) {
-                updateData(req, TeamModelB);
+                updateData(local, visitor, localTotalGoals, visitorTotalGoals, TeamModelB);
             }
-            // TODO: Añadir resultado a la colección Matchweek
             
+            updateMatchWeek(localTeam, visitorTeam,  localTotalGoals, visitorTotalGoals, matchWeek, group, matchWeeksModel);
 
           } catch (error) {
             return res.status(400).send({
