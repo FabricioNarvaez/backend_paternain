@@ -11,7 +11,7 @@ const TeamSchema = new Schema({
     GF: Number,
     GC: Number,
     logo: String,
-    players: Object,
+    players: Array,
 });
 const TeamModelA = mongoose.model('TeamA', TeamSchema, 'grupoA');
 const TeamModelB = mongoose.model('TeamB', TeamSchema, 'grupoB');

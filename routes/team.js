@@ -15,6 +15,7 @@ router.get('/teamById/:group/:id', TeamController.getTeamByID);
 router.get('/teamByName/:group/:name', TeamController.getTeamByName);
 router.put('/team/:group/:id', TeamController.update);
 router.put('/update', TeamController.updateMatchData);
+router.put('/savePlayers', TeamController.savePlayers);
 router.delete('/team/:group/:id', TeamController.delete);
 
 module.exports = router;
