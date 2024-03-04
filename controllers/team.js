@@ -355,7 +355,15 @@ const controller = {
                         .updateOne(
                             { team: team.team },
                             { $inc: { "players.$[jug].goals": player.goals } },
-                            { arrayFilters: [{ "jug.name": player.name }] }
+                            { arrayFilters: [{ "jug.name": player.name }] },
+                            {arrayFilters: [
+                                {
+                                    $or: [
+                                        { "jug.name": player.name },
+                                        { "jug.number": player.name }
+                                    ],
+                                },
+                            ]}
                         )
                         .then((result) => {
                             console.log(result);
