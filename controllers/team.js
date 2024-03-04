@@ -116,7 +116,7 @@ const controller = {
                         if (goals !== 0) {
                             teamData.players.push({
                                 name: player.name,
-                                number: player.number,
+                                number: player.name,
                                 goals: goals,
                                 team: teamName,
                             });
@@ -351,20 +351,18 @@ const controller = {
             );
 
             function updatePlayerGoals(team) {
+                let filterCriteria;
+                if (typeof player.name === "string") {
+                    filterCriteria = { "jug.name": player.name };
+                } else {
+                    filterCriteria = { "jug.number": player.name };
+                }
                 team.players.forEach((player) => {
                     model
                         .updateOne(
                             { team: team.team },
                             { $inc: { "players.$[jug].goals": player.goals } },
-                            { arrayFilters: [{ "jug.name": player.name }] },
-                            {arrayFilters: [
-                                {
-                                    $or: [
-                                        { "jug.name": player.name },
-                                        { "jug.number": player.name }
-                                    ],
-                                },
-                            ]}
+                            {arrayFilters: [filterCriteria]}
                         )
                         .then((result) => {
                             console.log(result);
