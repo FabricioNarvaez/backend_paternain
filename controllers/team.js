@@ -116,6 +116,7 @@ const controller = {
                         if (goals !== 0) {
                             teamData.players.push({
                                 name: player.name,
+                                number: player.number,
                                 goals: goals,
                                 team: teamName,
                             });
