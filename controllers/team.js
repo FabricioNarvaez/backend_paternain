@@ -395,7 +395,7 @@ const controller = {
                     visitorTotalGoals,
                     TeamModelA
                 );
-            } else if (await TeamModelB.findOne({ team: local.team })) {
+            } else {
                 updateData(
                     local,
                     visitor,
