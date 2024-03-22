@@ -362,7 +362,10 @@ const controller = {
                             console.log(result);
                         })
                         .catch((err) => {
-                            console.error(err);
+                            return res.status(400).send({
+                                status: "error",
+                                message: err,
+                            });
                         });
                 });
             }
@@ -388,7 +391,7 @@ const controller = {
             const localTeam = local.team;
             const visitorTeam = visitor.team;
             if (teamGroupA) {
-                updateData(
+                await updateData(
                     local,
                     visitor,
                     localTotalGoals,
@@ -396,7 +399,7 @@ const controller = {
                     TeamModelA
                 );
             } else {
-                updateData(
+                await updateData(
                     local,
                     visitor,
                     localTotalGoals,
@@ -405,7 +408,7 @@ const controller = {
                 );
             }
 
-            updateMatchWeek(
+            await updateMatchWeek(
                 localTeam,
                 visitorTeam,
                 localTotalGoals,
