@@ -350,7 +350,7 @@ const controller = {
                 localTotalGoals
             );
 
-            function updatePlayerGoals(team) {
+            async function updatePlayerGoals(team) {
                 team.players.forEach((player) => {
                     model
                         .updateOne(
@@ -370,8 +370,8 @@ const controller = {
                 });
             }
 
-            updatePlayerGoals(local);
-            updatePlayerGoals(visitor);
+            await updatePlayerGoals(local);
+            await updatePlayerGoals(visitor);
 
             await model.findOneAndUpdate({ team: local.team }, updateLocal, {
                 new: true,
@@ -385,28 +385,19 @@ const controller = {
 
         try {
             const { local, visitor, matchWeek, group } = req.body;
-            const teamGroupA = await TeamModelA.findOne({ team: local.team });
             const localTotalGoals = getTotalGoals(local.players);
             const visitorTotalGoals = getTotalGoals(visitor.players);
             const localTeam = local.team;
             const visitorTeam = visitor.team;
-            if (teamGroupA) {
-                await updateData(
-                    local,
-                    visitor,
-                    localTotalGoals,
-                    visitorTotalGoals,
-                    TeamModelA
-                );
-            } else {
-                await updateData(
-                    local,
-                    visitor,
-                    localTotalGoals,
-                    visitorTotalGoals,
-                    TeamModelB
-                );
-            }
+            const teamModel = group === 'groupA' ? TeamModelA : TeamModelB;
+            
+            await updateData(
+                local,
+                visitor,
+                localTotalGoals,
+                visitorTotalGoals,
+                teamModel
+            );
 
             await updateMatchWeek(
                 localTeam,
@@ -417,14 +408,13 @@ const controller = {
                 group,
                 matchWeeksModel
             );
+            res.send("Datos del partido actualizados.");
         } catch (error) {
             return res.status(400).send({
                 status: "error",
                 message: "Error al actualizar.",
             });
         }
-
-        res.send("Datos del partido actualizados.");
     },
     update: (req, res) => {
         const teamId = req.params.id;
